@@ -1,0 +1,1644 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="dark">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>EduSupport — Smart Student Early-Warning & Academic Support Dashboard</title>
+  <!-- Google Fonts: Inter & JetBrains Mono -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+  <!-- Chart.js CDN -->
+  <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.2/dist/chart.umd.min.js"></script>
+  <!-- Stylesheet -->
+  <link rel="stylesheet" href="style.css">
+</head>
+<body class="theme-dark">
+  <!-- Toast Notification Container -->
+  <div id="toast-container" class="toast-container" aria-live="polite" aria-atomic="true"></div>
+
+  <!-- ========================================================================= -->
+  <!-- 1. AUTHENTICATION VIEW (Register First & Sign In via LocalStorage)        -->
+  <!-- ========================================================================= -->
+  <div id="auth-view" class="auth-view-wrapper">
+    <div class="auth-card">
+      <div class="auth-header">
+        <div class="brand-badge-row">
+          <div class="brand-logo">
+            <svg class="brand-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <path d="M22 10v6M2 10l10-5 10 5-10 5z"/>
+              <path d="M6 12v5c3 3 9 3 12 0v-5"/>
+            </svg>
+            <span class="brand-name">Edu<span>Support</span></span>
+          </div>
+          <span class="version-badge">Personal Workspace</span>
+        </div>
+        <h1 class="auth-title">Student Early-Warning & Academic Support Platform</h1>
+        <p class="auth-subtitle">Register your account to initialize your personal, blank early-warning academic analytics workspace.</p>
+      </div>
+
+      <!-- Auth Form Tabs (Register first, or Sign in) -->
+      <div class="auth-tabs">
+        <button type="button" class="auth-tab active" id="tab-register">Create Account (Register)</button>
+        <button type="button" class="auth-tab" id="tab-login">Sign In</button>
+      </div>
+
+      <form id="auth-form" class="auth-form">
+        <!-- Register-only fields -->
+        <div class="form-group" id="group-name">
+          <label for="auth-name" class="form-label">Full Name *</label>
+          <div class="input-with-icon">
+            <svg class="input-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M19 21v-2a4 4 0 0 0-4-4H9a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
+            <input type="text" id="auth-name" class="form-input" placeholder="e.g. Professor Sarah Connor">
+          </div>
+          <span class="form-error" id="error-name"></span>
+        </div>
+
+        <div class="form-group" id="group-role">
+          <label for="auth-role-select" class="form-label">Your Academic Role *</label>
+          <select id="auth-role-select" class="form-input">
+            <option value="teacher">Teacher / Faculty Advisor / Dept Head</option>
+            <option value="student">Student</option>
+          </select>
+          <span class="hint-text mt-1">Teachers have administrative access to manage students, attendance, tests & support plans.</span>
+        </div>
+
+        <div class="form-group" id="group-student-id" style="display: none;">
+          <label for="auth-student-id" class="form-label">Your Student ID</label>
+          <input type="text" id="auth-student-id" class="form-input" placeholder="e.g. STU-2026-01">
+        </div>
+
+        <!-- Common fields -->
+        <div class="form-group">
+          <label for="auth-email" class="form-label">Email Address *</label>
+          <div class="input-with-icon">
+            <svg class="input-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect width="20" height="16" x="2" y="4" rx="2"/><path d="m22 7-8.97 5.7a1.94 1.94 0 0 1-2.06 0L2 7"/></svg>
+            <input type="email" id="auth-email" class="form-input" placeholder="your.name@institution.edu" required>
+          </div>
+          <span class="form-error" id="error-email"></span>
+        </div>
+
+        <div class="form-group">
+          <div class="label-row">
+            <label for="auth-password" class="form-label">Password *</label>
+          </div>
+          <div class="input-with-icon">
+            <svg class="input-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect width="18" height="11" x="3" y="11" rx="2" ry="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>
+            <input type="password" id="auth-password" class="form-input" placeholder="••••••••" required>
+            <button type="button" class="btn-toggle-pw" id="btn-toggle-pw" title="Toggle password visibility">
+              <svg id="pw-eye-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M2 12s3-7 10-7 10 7 10 7-3 7-10 7-10-7-10-7Z"/><circle cx="12" cy="12" r="3"/></svg>
+            </button>
+          </div>
+          <span class="form-error" id="error-password"></span>
+        </div>
+
+        <div class="form-group" id="group-confirm-password">
+          <label for="auth-confirm-password" class="form-label">Confirm Password *</label>
+          <div class="input-with-icon">
+            <svg class="input-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect width="18" height="11" x="3" y="11" rx="2" ry="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>
+            <input type="password" id="auth-confirm-password" class="form-input" placeholder="••••••••">
+          </div>
+        </div>
+
+        <button type="submit" class="btn btn-primary btn-block mt-3" id="btn-auth-submit">
+          <span id="auth-btn-label">Create Account & Proceed</span>
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" class="btn-icon-right"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
+        </button>
+      </form>
+
+      <div class="auth-footer-notice">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><path d="M12 16v-4M12 8h.01"/></svg>
+        <span>100% Client-Side Architecture. All credentials and records persist exclusively in your browser localStorage.</span>
+      </div>
+    </div>
+  </div>
+
+  <!-- ========================================================================= -->
+  <!-- 2. ONBOARDING & REQUIREMENTS SETUP WIZARD                                 -->
+  <!-- ========================================================================= -->
+  <div id="wizard-view" class="auth-view-wrapper wizard-wrapper" style="display: none;">
+    <div class="auth-card wizard-card">
+      <div class="wizard-progress-bar">
+        <div class="wizard-progress-fill" id="wizard-progress-fill"></div>
+      </div>
+
+      <div class="auth-header">
+        <div class="brand-badge-row">
+          <span class="version-badge">Initial Setup Wizard</span>
+        </div>
+        <h2 class="auth-title">Configure Your Academic Requirements</h2>
+        <p class="auth-subtitle">Define your institution, course subjects, and early-warning distress thresholds before launching your dashboard.</p>
+      </div>
+
+      <form id="wizard-form">
+        <!-- Section 1: Institution & Academic Context -->
+        <div class="wizard-section">
+          <h3 class="wizard-section-heading">
+            <span class="step-num">1</span> Institution & Academic Context
+          </h3>
+          <div class="form-row-2">
+            <div class="form-group">
+              <label for="req-school-name" class="form-label">School / University / College Name *</label>
+              <input type="text" id="req-school-name" class="form-input" placeholder="e.g. Apex Institute of Technology" required>
+            </div>
+            <div class="form-group">
+              <label for="req-dept-name" class="form-label">Primary Department / Division *</label>
+              <input type="text" id="req-dept-name" class="form-input" placeholder="e.g. Computer Science & Engineering" required>
+            </div>
+          </div>
+          <div class="form-row-2">
+            <div class="form-group">
+              <label for="req-term-name" class="form-label">Current Academic Term / Semester *</label>
+              <input type="text" id="req-term-name" class="form-input" placeholder="e.g. Fall Semester 2026" required>
+            </div>
+            <div class="form-group">
+              <label for="req-grading-scale" class="form-label">Grading Scale Maximum Marks</label>
+              <input type="number" id="req-grading-scale" class="form-input" value="100" min="10" max="1000">
+            </div>
+          </div>
+        </div>
+
+        <!-- Section 2: Monitored Academic Subjects -->
+        <div class="wizard-section mt-4">
+          <h3 class="wizard-section-heading">
+            <span class="step-num">2</span> Course Subjects to Monitor
+          </h3>
+          <p class="hint-text mb-2">Add the subjects taught in your department. You can add or remove subjects at any time.</p>
+          
+          <div class="subject-input-row">
+            <input type="text" id="req-new-subject" class="form-input flex-1" placeholder="Type subject name (e.g. Data Structures, Calculus, Physics)...">
+            <button type="button" class="btn btn-secondary" id="btn-add-subject-tag">+ Add Subject</button>
+          </div>
+
+          <div class="subject-tags-container mt-2" id="req-subjects-tags">
+            <!-- Dynamic tags injected via JS -->
+          </div>
+        </div>
+
+        <!-- Section 3: Early-Warning Scoring Engine Rules -->
+        <div class="wizard-section mt-4">
+          <h3 class="wizard-section-heading">
+            <span class="step-num">3</span> Early-Warning Heuristic Thresholds
+          </h3>
+          <p class="hint-text mb-3">Set the rule thresholds that determine when a student is flagged for academic intervention.</p>
+          
+          <div class="form-row-2">
+            <div class="form-group">
+              <label for="req-att-threshold" class="form-label">Critical Attendance Warning Threshold (%) *</label>
+              <div class="input-with-icon">
+                <input type="number" id="req-att-threshold" class="form-input" value="75" min="40" max="95" required>
+              </div>
+              <span class="hint-text">Students with presence below this receive <strong>+30 risk points</strong>.</span>
+            </div>
+
+            <div class="form-group">
+              <label for="req-marks-threshold" class="form-label">Minimum Passing Assessment Threshold (%) *</label>
+              <div class="input-with-icon">
+                <input type="number" id="req-marks-threshold" class="form-input" value="40" min="20" max="75" required>
+              </div>
+              <span class="hint-text">Students with test averages below this receive <strong>+30 risk points</strong>.</span>
+            </div>
+          </div>
+
+          <div class="form-row-2">
+            <div class="form-group">
+              <label for="req-tasks-threshold" class="form-label">Pending / Overdue Tasks Warning Limit *</label>
+              <input type="number" id="req-tasks-threshold" class="form-input" value="3" min="1" max="10" required>
+              <span class="hint-text">Students with this many incomplete tasks receive <strong>+20 risk points</strong>.</span>
+            </div>
+
+            <div class="form-group">
+              <label for="req-drop-threshold" class="form-label">Successive Exam Drop Alert Margin (%) *</label>
+              <input type="number" id="req-drop-threshold" class="form-input" value="10" min="5" max="30" required>
+              <span class="hint-text">Students with a score drop of this much receive <strong>+20 risk points</strong>.</span>
+            </div>
+          </div>
+        </div>
+
+        <button type="submit" class="btn btn-primary btn-block btn-lg mt-4" id="btn-submit-wizard">
+          <span>Apply Requirements & Launch Dashboard</span>
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" class="btn-icon-right"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
+        </button>
+      </form>
+    </div>
+  </div>
+
+  <!-- ========================================================================= -->
+  <!-- 3. MAIN APPLICATION WORKSPACE                                             -->
+  <!-- ========================================================================= -->
+  <div id="app-view" class="app-layout" style="display: none;">
+    
+    <!-- Collapsible Sidebar -->
+    <aside id="sidebar" class="sidebar">
+      <div class="sidebar-brand">
+        <div class="brand-logo">
+          <svg class="brand-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <path d="M22 10v6M2 10l10-5 10 5-10 5z"/>
+            <path d="M6 12v5c3 3 9 3 12 0v-5"/>
+          </svg>
+          <div class="brand-text">
+            <span class="brand-name">Edu<span>Support</span></span>
+            <span class="brand-tag" id="sidebar-institution-tag">Academic Suite</span>
+          </div>
+        </div>
+        <button class="btn-icon sidebar-collapse-btn" id="sidebar-toggle-btn" title="Toggle sidebar">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="m15 18-6-6 6-6"/></svg>
+        </button>
+      </div>
+
+      <!-- User Role Mode Indicator -->
+      <div class="sidebar-user-pill">
+        <div class="user-pill-avatar" id="sidebar-avatar">US</div>
+        <div class="user-pill-info">
+          <span class="user-pill-name" id="sidebar-user-name">User</span>
+          <span class="user-pill-role" id="sidebar-user-role">Teacher / Advisor</span>
+        </div>
+        <span class="status-dot"></span>
+      </div>
+
+      <!-- Navigation List -->
+      <nav class="sidebar-nav">
+        <div class="nav-section-title">CORE ANALYTICS</div>
+        <button class="nav-item active" data-view="overview" id="nav-overview">
+          <svg class="nav-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect width="7" height="9" x="3" y="3" rx="1"/><rect width="7" height="5" x="14" y="3" rx="1"/><rect width="7" height="9" x="14" y="12" rx="1"/><rect width="7" height="5" x="3" y="16" rx="1"/></svg>
+          <span class="nav-label">Overview</span>
+        </button>
+
+        <button class="nav-item" data-view="early-warnings" id="nav-early-warnings">
+          <div class="icon-with-badge">
+            <svg class="nav-icon alert-icon-color" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="m21.73 18-8-14a2 2 0 0 0-3.48 0l-8 14A2 2 0 0 0 4 21h16a2 2 0 0 0 1.73-3Z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>
+            <span class="nav-badge-count" id="nav-badge-warning-count" style="display:none;">0</span>
+          </div>
+          <span class="nav-label">Early Warnings</span>
+        </button>
+
+        <button class="nav-item" data-view="support-plans" id="nav-support-plans">
+          <svg class="nav-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/><path d="m9 12 2 2 4-4"/></svg>
+          <span class="nav-label">Support Plans</span>
+          <span class="nav-chip" id="nav-chip-plans">0</span>
+        </button>
+
+        <div class="nav-section-title" id="teacher-section-title">STUDENT MANAGEMENT</div>
+        <button class="nav-item teacher-only" data-view="students" id="nav-students">
+          <svg class="nav-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M22 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>
+          <span class="nav-label">Students</span>
+          <span class="nav-counter" id="nav-counter-students">0</span>
+        </button>
+
+        <button class="nav-item teacher-only" data-view="attendance" id="nav-attendance">
+          <svg class="nav-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect width="18" height="18" x="3" y="4" rx="2" ry="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/><path d="m9 16 2 2 4-4"/></svg>
+          <span class="nav-label">Attendance</span>
+        </button>
+
+        <button class="nav-item teacher-only" data-view="assessments" id="nav-assessments">
+          <svg class="nav-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/><polyline points="10 9 9 9 8 9"/></svg>
+          <span class="nav-label">Assessments</span>
+        </button>
+
+        <button class="nav-item" data-view="learning-activity" id="nav-learning-activity">
+          <svg class="nav-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/></svg>
+          <span class="nav-label">Learning Tasks</span>
+        </button>
+
+        <div class="nav-section-title">INSIGHTS & SYSTEM</div>
+        <button class="nav-item teacher-only" data-view="reports" id="nav-reports">
+          <svg class="nav-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 3v18h18"/><path d="m19 9-5 5-4-4-3 3"/></svg>
+          <span class="nav-label">Reports & Analytics</span>
+        </button>
+
+        <button class="nav-item" data-view="settings" id="nav-settings">
+          <svg class="nav-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12.22 2h-.44a2 2 0 0 0-2 2v.18a2 2 0 0 1-1 1.73l-.43.25a2 2 0 0 1-2 0l-.15-.08a2 2 0 0 0-2.73.73l-.22.38a2 2 0 0 0 .73 2.73l.15.1a2 2 0 0 1 1 1.72v.51a2 2 0 0 1-1 1.74l-.15.09a2 2 0 0 0-.73 2.73l.22.38a2 2 0 0 0 2.73.73l.15-.08a2 2 0 0 1 2 0l.43.25a2 2 0 0 1 1 1.73V20a2 2 0 0 0 2 2h.44a2 2 0 0 0 2-2v-.18a2 2 0 0 1 1-1.73l.43-.25a2 2 0 0 1 2 0l.15.08a2 2 0 0 0 2.73-.73l.22-.39a2 2 0 0 0-.73-2.73l-.15-.08a2 2 0 0 1-1-1.74v-.5a2 2 0 0 1 1-1.74l.15-.09a2 2 0 0 0 .73-2.73l-.22-.38a2 2 0 0 0-2.73-.73l-.15.08a2 2 0 0 1-2 0l-.43-.25a2 2 0 0 1-1-1.73V4a2 2 0 0 0-2-2z"/><circle cx="12" cy="12" r="3"/></svg>
+          <span class="nav-label">Settings</span>
+        </button>
+      </nav>
+
+      <!-- Sidebar Footer -->
+      <div class="sidebar-footer">
+        <button class="sidebar-reset-btn" id="btn-reopen-wizard" title="Modify Institutional Requirements">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 20h9"/><path d="M16.5 3.5a2.12 2.12 0 0 1 3 3L7 19l-4 1 1-4Z"/></svg>
+          <span>Setup Wizard</span>
+        </button>
+      </div>
+    </aside>
+
+    <!-- Main Workspace Container -->
+    <div class="main-wrapper" id="main-wrapper">
+      
+      <!-- Top Navigation Bar -->
+      <header class="topbar" id="topbar">
+        <div class="topbar-left">
+          <button class="btn-icon mobile-menu-btn" id="mobile-menu-btn" title="Open navigation">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="4" x2="20" y1="12" y2="12"/><line x1="4" x2="20" y1="6" y2="6"/><line x1="4" x2="20" y1="18" y2="18"/></svg>
+          </button>
+          
+          <div class="breadcrumbs">
+            <span class="breadcrumb-root" id="breadcrumb-school-name">EduSupport</span>
+            <span class="breadcrumb-separator">/</span>
+            <span class="breadcrumb-current" id="breadcrumb-current">Overview</span>
+          </div>
+        </div>
+
+        <!-- Global Search Bar -->
+        <div class="topbar-center">
+          <div class="global-search-box">
+            <svg class="search-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.3-4.3"/></svg>
+            <input type="text" id="global-search-input" class="global-search-input" placeholder="Search students, alerts, plans... (Press '/' to focus)" autocomplete="off">
+            <span class="search-kbd-hint">/</span>
+            <div id="search-results-dropdown" class="search-results-dropdown" style="display: none;"></div>
+          </div>
+        </div>
+
+        <div class="topbar-right">
+          <!-- Notification Bell & Dropdown -->
+          <div class="dropdown-wrapper">
+            <button class="btn-icon topbar-action-btn" id="btn-notifications" title="Notifications & Early Warnings">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M6 8a6 6 0 0 1 12 0c0 7 3 9 3 9H3s3-2 3-9"/><path d="M10.3 21a1.94 1.94 0 0 0 3.4 0"/></svg>
+              <span class="notif-badge" id="topbar-notif-count" style="display:none;">0</span>
+            </button>
+            <div class="dropdown-menu notif-dropdown" id="notif-dropdown" style="display: none;">
+              <div class="notif-header">
+                <span class="notif-title">Alerts & Notifications</span>
+                <button class="btn-link" id="btn-mark-all-read">Clear all</button>
+              </div>
+              <div class="notif-list" id="notif-list-container">
+                <!-- Injected via JS -->
+              </div>
+              <div class="notif-footer">
+                <button class="btn-link" id="btn-view-all-warnings">View early warnings &rarr;</button>
+              </div>
+            </div>
+          </div>
+
+          <!-- Dark/Light Theme Toggle -->
+          <button class="btn-icon topbar-action-btn theme-toggle-btn" id="btn-theme-toggle" title="Toggle Dark/Light Mode">
+            <svg id="theme-moon-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 3a6 6 0 0 0 9 9 9 9 0 1 1-9-9Z"/></svg>
+            <svg id="theme-sun-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="display: none;"><circle cx="12" cy="12" r="4"/><path d="M12 2v2M12 20v2M4.93 4.93l1.41 1.41M17.66 17.66l1.41 1.41M2 12h2M20 12h2M6.34 17.66l-1.41 1.41M19.07 4.93l-1.41 1.41"/></svg>
+          </button>
+
+          <!-- User Profile Menu -->
+          <div class="dropdown-wrapper">
+            <button class="user-profile-btn" id="btn-user-profile" title="User Menu">
+              <div class="user-avatar" id="topbar-user-avatar">US</div>
+              <div class="user-details-compact">
+                <span class="user-name" id="topbar-user-name">User</span>
+                <span class="user-role-badge" id="topbar-user-role-badge">Teacher</span>
+              </div>
+              <svg class="dropdown-chevron" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="m6 9 6 6 6-6"/></svg>
+            </button>
+            <div class="dropdown-menu profile-dropdown" id="profile-dropdown" style="display: none;">
+              <div class="profile-dropdown-header">
+                <div class="p-name" id="menu-user-name">User</div>
+                <div class="p-email" id="menu-user-email">user@institution.edu</div>
+              </div>
+              <div class="profile-dropdown-divider"></div>
+              <div class="profile-dropdown-item" id="btn-menu-wizard">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 20h9"/><path d="M16.5 3.5a2.12 2.12 0 0 1 3 3L7 19l-4 1 1-4Z"/></svg>
+                <span>Edit Requirements Setup</span>
+              </div>
+              <div class="profile-dropdown-item" id="btn-profile-settings">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg>
+                <span>System Settings</span>
+              </div>
+              <div class="profile-dropdown-divider"></div>
+              <div class="profile-dropdown-item text-danger" id="btn-logout">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><polyline points="16 17 21 12 16 7"/><line x1="21" y1="12" x2="9" y2="12"/></svg>
+                <span>Sign Out</span>
+              </div>
+            </div>
+          </div>
+        </div>
+      </header>
+
+      <!-- Content Views Container -->
+      <main class="content-area" id="content-area">
+
+        <!-- =================================================================== -->
+        <!-- VIEW 1: OVERVIEW DASHBOARD                                         -->
+        <!-- =================================================================== -->
+        <section class="view-panel active" id="view-overview">
+          
+          <!-- Welcome Banner -->
+          <div class="welcome-banner">
+            <div class="welcome-text-col">
+              <div class="welcome-date" id="welcome-term-label">Fall Semester 2026</div>
+              <h2 class="welcome-heading" id="welcome-heading">Welcome 👋</h2>
+              <p class="welcome-subheading" id="welcome-subheading">Here is your live student early-warning overview based on your configured institutional requirements.</p>
+            </div>
+            <div class="welcome-actions-col" id="teacher-quick-actions">
+              <button class="btn btn-secondary" id="btn-quick-new-plan">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/><line x1="12" y1="8" x2="12" y2="14"/><line x1="9" y1="11" x2="15" y2="11"/></svg>
+                <span>New Support Plan</span>
+              </button>
+              <button class="btn btn-primary" id="btn-quick-add-student">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><line x1="19" y1="8" x2="19" y2="14"/><line x1="16" y1="11" x2="22" y2="11"/></svg>
+                <span>Add Student</span>
+              </button>
+            </div>
+          </div>
+
+          <!-- 6 Dynamic Metric Summary Cards -->
+          <div class="stats-grid">
+            <!-- 1. Total Students -->
+            <div class="stat-card accent-blue">
+              <div class="stat-header">
+                <span class="stat-title">Total Enrolled</span>
+                <div class="stat-icon-wrapper blue-icon">
+                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M22 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>
+                </div>
+              </div>
+              <div class="stat-value" id="kpi-total-students">0</div>
+              <div class="stat-footer">
+                <span class="stat-trend positive" id="kpi-students-subtext">Active cohort</span>
+                <span class="stat-context" id="kpi-dept-label">My Department</span>
+              </div>
+            </div>
+
+            <!-- 2. Avg Attendance -->
+            <div class="stat-card accent-cyan">
+              <div class="stat-header">
+                <span class="stat-title">Avg Attendance</span>
+                <div class="stat-icon-wrapper cyan-icon">
+                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect width="18" height="18" x="3" y="4" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/><path d="m9 16 2 2 4-4"/></svg>
+                </div>
+              </div>
+              <div class="stat-value" id="kpi-avg-attendance">0%</div>
+              <div class="stat-footer">
+                <span class="stat-trend" id="kpi-attendance-trend">Presence rate</span>
+                <span class="stat-context" id="kpi-att-threshold-label">Req: 75%</span>
+              </div>
+            </div>
+
+            <!-- 3. Avg Assessment Score -->
+            <div class="stat-card accent-violet">
+              <div class="stat-header">
+                <span class="stat-title">Avg Assessment Score</span>
+                <div class="stat-icon-wrapper violet-icon">
+                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/></svg>
+                </div>
+              </div>
+              <div class="stat-value" id="kpi-avg-marks">0%</div>
+              <div class="stat-footer">
+                <span class="stat-trend" id="kpi-marks-trend">Recorded tests</span>
+                <span class="stat-context" id="kpi-pass-threshold-label">Pass: 40%</span>
+              </div>
+            </div>
+
+            <!-- 4. Students Requiring Support -->
+            <div class="stat-card accent-danger">
+              <div class="stat-header">
+                <span class="stat-title">Students at Risk</span>
+                <div class="stat-icon-wrapper danger-icon">
+                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="m21.73 18-8-14a2 2 0 0 0-3.48 0l-8 14A2 2 0 0 0 4 21h16a2 2 0 0 0 1.73-3Z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>
+                </div>
+              </div>
+              <div class="stat-value text-danger" id="kpi-risk-students">0</div>
+              <div class="stat-footer">
+                <span class="stat-badge-danger" id="kpi-high-risk-count">0 High Risk</span>
+                <span class="stat-context" id="kpi-med-risk-count">0 Medium</span>
+              </div>
+            </div>
+
+            <!-- 5. Pending Assignments -->
+            <div class="stat-card accent-warning">
+              <div class="stat-header">
+                <span class="stat-title">Pending Tasks</span>
+                <div class="stat-icon-wrapper warning-icon">
+                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
+                </div>
+              </div>
+              <div class="stat-value text-warning" id="kpi-pending-assignments">0</div>
+              <div class="stat-footer">
+                <span class="stat-trend negative" id="kpi-overdue-count">0 overdue</span>
+                <span class="stat-context">Active tasks</span>
+              </div>
+            </div>
+
+            <!-- 6. Active Support Plans -->
+            <div class="stat-card accent-emerald">
+              <div class="stat-header">
+                <span class="stat-title">Open Support Plans</span>
+                <div class="stat-icon-wrapper emerald-icon">
+                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/><path d="m9 12 2 2 4-4"/></svg>
+                </div>
+              </div>
+              <div class="stat-value text-success" id="kpi-open-plans">0</div>
+              <div class="stat-footer">
+                <span class="stat-trend positive" id="kpi-plans-resolved">0 resolved</span>
+                <span class="stat-context">Active interventions</span>
+              </div>
+            </div>
+          </div>
+
+          <!-- Charts Row 1: Attendance Trends & Subject-Wise Performance -->
+          <div class="dashboard-grid-2">
+            <div class="card chart-card">
+              <div class="card-header">
+                <div class="card-title-group">
+                  <h3 class="card-title">Attendance Trends Over Time</h3>
+                  <p class="card-subtitle">Cohort presence rate (%) with configured early-warning threshold</p>
+                </div>
+                <div class="chart-legend-badge" id="chart-att-threshold-badge">Threshold: 75%</div>
+              </div>
+              <div class="card-body chart-container-wrapper">
+                <canvas id="chart-attendance-trend" height="240"></canvas>
+              </div>
+            </div>
+
+            <div class="card chart-card">
+              <div class="card-header">
+                <div class="card-title-group">
+                  <h3 class="card-title">Subject-Wise Assessment Performance</h3>
+                  <p class="card-subtitle">Cohort average score (%) across your configured subjects</p>
+                </div>
+              </div>
+              <div class="card-body chart-container-wrapper">
+                <canvas id="chart-subject-performance" height="240"></canvas>
+              </div>
+            </div>
+          </div>
+
+          <!-- Charts Row 2: Early-Warning Risk Distribution & Assignment Tasks -->
+          <div class="dashboard-grid-2">
+            <div class="card chart-card">
+              <div class="card-header">
+                <div class="card-title-group">
+                  <h3 class="card-title">Early-Warning Risk Distribution</h3>
+                  <p class="card-subtitle">Student distribution by heuristic risk level</p>
+                </div>
+              </div>
+              <div class="card-body chart-container-wrapper donut-wrapper">
+                <canvas id="chart-risk-distribution" height="220"></canvas>
+              </div>
+            </div>
+
+            <div class="card chart-card">
+              <div class="card-header">
+                <div class="card-title-group">
+                  <h3 class="card-title">Assignment Task Completion</h3>
+                  <p class="card-subtitle">Completed vs Pending vs Overdue</p>
+                </div>
+              </div>
+              <div class="card-body chart-container-wrapper donut-wrapper">
+                <canvas id="chart-assignment-completion" height="220"></canvas>
+              </div>
+            </div>
+          </div>
+
+          <!-- Early-Warning Quick Alert Feed & Attention Roster -->
+          <div class="dashboard-grid-2">
+            <!-- Urgent Action Panel -->
+            <div class="card">
+              <div class="card-header">
+                <div class="card-title-group">
+                  <h3 class="card-title flex-align-center">
+                    <svg class="alert-icon-color mr-2" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="m21.73 18-8-14a2 2 0 0 0-3.48 0l-8 14A2 2 0 0 0 4 21h16a2 2 0 0 0 1.73-3Z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>
+                    High-Priority Early-Warning Panel
+                  </h3>
+                  <p class="card-subtitle">Students meeting critical academic distress indicators</p>
+                </div>
+                <button class="btn btn-sm btn-ghost" id="btn-goto-warnings">View All &rarr;</button>
+              </div>
+              <div class="card-body p-0">
+                <div class="alert-list" id="overview-alert-list">
+                  <!-- Injected via JS -->
+                </div>
+              </div>
+            </div>
+
+            <!-- Attendance & Score Declining Roster -->
+            <div class="card">
+              <div class="card-header">
+                <div class="card-title-group">
+                  <h3 class="card-title flex-align-center">
+                    <svg class="warning-icon-color mr-2" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="23 18 13.5 8.5 8.5 13.5 1 6"/><polyline points="17 18 23 18 23 12"/></svg>
+                    Declining Trajectory Alerts
+                  </h3>
+                  <p class="card-subtitle">Consecutive absences or significant test score drops</p>
+                </div>
+              </div>
+              <div class="card-body p-0">
+                <div class="declining-list" id="overview-declining-list">
+                  <!-- Injected via JS -->
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Recent Learning & Intervention Feed -->
+          <div class="card mt-4">
+            <div class="card-header">
+              <div class="card-title-group">
+                <h3 class="card-title">Recent Academic Activity & Intervention Feed</h3>
+                <p class="card-subtitle">Audit log of student registrations, attendance, marks, and interventions</p>
+              </div>
+            </div>
+            <div class="card-body p-0">
+              <div class="timeline-feed" id="overview-activity-feed">
+                <!-- Injected via JS -->
+              </div>
+            </div>
+          </div>
+
+        </section>
+
+        <!-- =================================================================== -->
+        <!-- VIEW 2: STUDENTS ROSTER & MANAGEMENT                               -->
+        <!-- =================================================================== -->
+        <section class="view-panel" id="view-students">
+          <div class="page-header">
+            <div>
+              <div class="page-title-row">
+                <h2 class="page-title">Student Directory</h2>
+                <span class="badge badge-neutral" id="students-badge-count">0 Students</span>
+              </div>
+              <p class="page-subtitle">Manage student enrollment, monitor individual risk metrics, and track interventions.</p>
+            </div>
+            <div class="page-actions">
+              <button class="btn btn-secondary" id="btn-export-students-csv">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
+                <span>Export CSV</span>
+              </button>
+              <button class="btn btn-primary" id="btn-add-student-modal">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><line x1="19" y1="8" x2="19" y2="14"/><line x1="16" y1="11" x2="22" y2="11"/></svg>
+                <span>Add Student</span>
+              </button>
+            </div>
+          </div>
+
+          <!-- Filter & Search Toolbar -->
+          <div class="filter-toolbar card">
+            <div class="filter-row-primary">
+              <div class="search-input-wrapper">
+                <svg class="search-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.3-4.3"/></svg>
+                <input type="text" id="filter-student-search" class="form-input" placeholder="Search by name, ID, or email...">
+              </div>
+
+              <div class="select-wrapper">
+                <select id="filter-student-dept" class="form-select">
+                  <option value="">All Departments</option>
+                </select>
+              </div>
+
+              <div class="select-wrapper">
+                <select id="filter-student-risk" class="form-select">
+                  <option value="">All Risk Priorities</option>
+                  <option value="high">High Risk (51-100)</option>
+                  <option value="medium">Medium Risk (21-50)</option>
+                  <option value="low">Low Risk (0-20)</option>
+                </select>
+              </div>
+
+              <div class="select-wrapper">
+                <select id="filter-student-attendance" class="form-select">
+                  <option value="">All Attendance</option>
+                  <option value="under75">Below Threshold (Critical)</option>
+                  <option value="75to85">Moderate Attendance</option>
+                  <option value="over85">High Attendance</option>
+                </select>
+              </div>
+
+              <div class="select-wrapper">
+                <select id="filter-student-marks" class="form-select">
+                  <option value="">All Marks Range</option>
+                  <option value="failing">Below Passing Threshold</option>
+                  <option value="average">Moderate Range</option>
+                  <option value="distinction">High Marks</option>
+                </select>
+              </div>
+            </div>
+
+            <div class="filter-row-secondary">
+              <div class="sort-controls">
+                <span class="sort-label">Sort By:</span>
+                <select id="sort-student-by" class="form-select form-select-sm">
+                  <option value="name">Full Name</option>
+                  <option value="riskScore">Risk Score</option>
+                  <option value="attendance">Attendance %</option>
+                  <option value="avgMarks">Average Marks</option>
+                  <option value="pendingAssignments">Pending Tasks</option>
+                  <option value="id">Student ID</option>
+                </select>
+                <button class="btn-icon btn-sm" id="btn-sort-direction" title="Toggle Ascending/Descending">
+                  <svg id="sort-asc-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="m3 8 4-4 4 4"/><path d="M7 4v16"/><path d="M11 12h10"/><path d="M11 16h7"/><path d="M11 20h4"/><path d="M11 8h12"/></svg>
+                </button>
+              </div>
+
+              <div class="view-mode-toggle">
+                <button class="btn-icon btn-sm active" id="btn-view-table" title="Table View">
+                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect width="18" height="18" x="3" y="3" rx="2"/><path d="M3 9h18"/><path d="M3 15h18"/><path d="M9 3v18"/></svg>
+                </button>
+                <button class="btn-icon btn-sm" id="btn-view-cards" title="Cards View">
+                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect width="7" height="7" x="3" y="3" rx="1"/><rect width="7" height="7" x="14" y="3" rx="1"/><rect width="7" height="7" x="14" y="14" rx="1"/><rect width="7" height="7" x="3" y="14" rx="1"/></svg>
+                </button>
+              </div>
+
+              <div class="filter-actions">
+                <button class="btn btn-ghost btn-sm" id="btn-clear-student-filters">Clear Filters</button>
+                <span class="results-counter" id="student-filter-counter">Showing 0 of 0</span>
+              </div>
+            </div>
+          </div>
+
+          <!-- Students Data Table View -->
+          <div class="card overflow-hidden" id="students-table-container">
+            <div class="table-responsive">
+              <table class="data-table" id="students-table">
+                <thead>
+                  <tr>
+                    <th>Student ID</th>
+                    <th>Student Name</th>
+                    <th>Department & Year</th>
+                    <th>Attendance %</th>
+                    <th>Avg Marks</th>
+                    <th>Pending Tasks</th>
+                    <th>Support Priority</th>
+                    <th class="text-right">Actions</th>
+                  </tr>
+                </thead>
+                <tbody id="students-table-body">
+                  <!-- Rendered via JS -->
+                </tbody>
+              </table>
+            </div>
+          </div>
+
+          <!-- Students Card Grid View -->
+          <div class="students-card-grid" id="students-cards-container" style="display: none;">
+            <!-- Rendered via JS -->
+          </div>
+
+          <!-- Empty State -->
+          <div class="empty-state-card" id="students-empty-state">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><line x1="19" y1="8" x2="19" y2="14"/><line x1="16" y1="11" x2="22" y2="11"/></svg>
+            <h3>No Students In Your Roster</h3>
+            <p>Your workspace is completely blank. Start building your cohort by enrolling your first student.</p>
+            <button class="btn btn-primary mt-3" id="btn-empty-add-student">+ Enroll First Student</button>
+          </div>
+        </section>
+
+        <!-- =================================================================== -->
+        <!-- VIEW 3: ATTENDANCE MANAGEMENT                                      -->
+        <!-- =================================================================== -->
+        <section class="view-panel" id="view-attendance">
+          <div class="page-header">
+            <div>
+              <h2 class="page-title">Daily Attendance Tracker</h2>
+              <p class="page-subtitle">Mark daily registers, inspect repeated absences, and recalculate cohort presence metrics.</p>
+            </div>
+            <div class="page-actions">
+              <button class="btn btn-secondary" id="btn-attendance-mark-all-present">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="20 6 9 17 4 12"/></svg>
+                <span>Mark All Present</span>
+              </button>
+            </div>
+          </div>
+
+          <!-- Attendance Control Bar -->
+          <div class="card p-4 mb-4">
+            <div class="attendance-toolbar">
+              <div class="date-selector-group">
+                <label for="attendance-date-picker" class="toolbar-label">Select Date:</label>
+                <input type="date" id="attendance-date-picker" class="form-input date-input">
+                <button class="btn btn-sm btn-ghost" id="btn-date-prev">&larr; Prev Day</button>
+                <button class="btn btn-sm btn-secondary" id="btn-date-today">Today</button>
+                <button class="btn btn-sm btn-ghost" id="btn-date-next">Next Day &rarr;</button>
+              </div>
+
+              <!-- Live Daily Stat Pills -->
+              <div class="attendance-daily-stats">
+                <div class="stat-pill pill-present">
+                  <span class="pill-dot green"></span>
+                  <span>Present:</span>
+                  <strong id="daily-count-present">0</strong>
+                </div>
+                <div class="stat-pill pill-late">
+                  <span class="pill-dot amber"></span>
+                  <span>Late:</span>
+                  <strong id="daily-count-late">0</strong>
+                </div>
+                <div class="stat-pill pill-absent">
+                  <span class="pill-dot red"></span>
+                  <span>Absent:</span>
+                  <strong id="daily-count-absent">0</strong>
+                </div>
+                <div class="stat-pill pill-rate">
+                  <span>Day Rate:</span>
+                  <strong id="daily-presence-rate">0%</strong>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Attendance Roster Table -->
+          <div class="card overflow-hidden">
+            <div class="card-header border-b">
+              <div class="card-title-group">
+                <h3 class="card-title">Student Attendance Register</h3>
+                <p class="card-subtitle">Mark individual statuses. Modifying records dynamically updates student risk profiles.</p>
+              </div>
+              <div class="search-input-compact">
+                <input type="text" id="attendance-filter-search" class="form-input form-input-sm" placeholder="Filter student...">
+              </div>
+            </div>
+            <div class="table-responsive">
+              <table class="data-table">
+                <thead>
+                  <tr>
+                    <th>Student ID</th>
+                    <th>Student Name</th>
+                    <th>Department</th>
+                    <th>Cumulative Attendance</th>
+                    <th>Recent Status</th>
+                    <th class="text-center">Status for Selected Date</th>
+                    <th>Historical Alert</th>
+                  </tr>
+                </thead>
+                <tbody id="attendance-table-body">
+                  <!-- Rendered via JS -->
+                </tbody>
+              </table>
+            </div>
+          </div>
+        </section>
+
+        <!-- =================================================================== -->
+        <!-- VIEW 4: ASSESSMENTS MANAGEMENT                                     -->
+        <!-- =================================================================== -->
+        <section class="view-panel" id="view-assessments">
+          <div class="page-header">
+            <div>
+              <h2 class="page-title">Assessment & Marks Engine</h2>
+              <p class="page-subtitle">Track academic examinations, record marks per student, and detect performance drop trends.</p>
+            </div>
+            <div class="page-actions">
+              <button class="btn btn-primary" id="btn-create-assessment-modal">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+                <span>New Assessment</span>
+              </button>
+            </div>
+          </div>
+
+          <!-- Assessment Cards Grid -->
+          <div class="assessments-list-grid" id="assessments-list-container">
+            <!-- Rendered via JS -->
+          </div>
+
+          <!-- Subject Performance Summary Table -->
+          <div class="card mt-4 overflow-hidden">
+            <div class="card-header">
+              <div class="card-title-group">
+                <h3 class="card-title">Subject-Wise Cohort Performance</h3>
+                <p class="card-subtitle">Subject averages, passing ratios, and detected performance drop anomalies</p>
+              </div>
+            </div>
+            <div class="table-responsive">
+              <table class="data-table">
+                <thead>
+                  <tr>
+                    <th>Subject</th>
+                    <th>Assessments Count</th>
+                    <th>Cohort Average %</th>
+                    <th>Highest Mark</th>
+                    <th>Lowest Mark</th>
+                    <th>Failing Students</th>
+                    <th>Status</th>
+                  </tr>
+                </thead>
+                <tbody id="subject-performance-table-body">
+                  <!-- Rendered via JS -->
+                </tbody>
+              </table>
+            </div>
+          </div>
+        </section>
+
+        <!-- =================================================================== -->
+        <!-- VIEW 5: LEARNING ACTIVITY TRACKER                                  -->
+        <!-- =================================================================== -->
+        <section class="view-panel" id="view-learning-activity">
+          <div class="page-header">
+            <div>
+              <h2 class="page-title">Learning Activity & Task Tracker</h2>
+              <p class="page-subtitle">Monitor assignment submissions, overdue deliverables, and practice task progress.</p>
+            </div>
+            <div class="page-actions">
+              <button class="btn btn-primary" id="btn-create-assignment-modal">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+                <span>New Assignment</span>
+              </button>
+            </div>
+          </div>
+
+          <!-- Activity Filter Bar -->
+          <div class="card p-3 mb-4">
+            <div class="filter-pills-row">
+              <button class="filter-pill active" data-task-filter="all">All Assignments (<span id="count-tasks-all">0</span>)</button>
+              <button class="filter-pill" data-task-filter="pending">Pending (<span id="count-tasks-pending">0</span>)</button>
+              <button class="filter-pill" data-task-filter="overdue">Overdue (<span id="count-tasks-overdue">0</span>)</button>
+              <button class="filter-pill" data-task-filter="completed">Completed (<span id="count-tasks-completed">0</span>)</button>
+            </div>
+          </div>
+
+          <!-- Assignments Table -->
+          <div class="card overflow-hidden">
+            <div class="table-responsive">
+              <table class="data-table">
+                <thead>
+                  <tr>
+                    <th>Assignment Title</th>
+                    <th>Subject</th>
+                    <th>Assigned Student</th>
+                    <th>Due Date</th>
+                    <th>Status</th>
+                    <th>Impact on Early-Warning</th>
+                    <th class="text-right">Actions</th>
+                  </tr>
+                </thead>
+                <tbody id="assignments-table-body">
+                  <!-- Rendered via JS -->
+                </tbody>
+              </table>
+            </div>
+          </div>
+        </section>
+
+        <!-- =================================================================== -->
+        <!-- VIEW 6: EARLY WARNINGS ENGINE (Core Feature)                       -->
+        <!-- =================================================================== -->
+        <section class="view-panel" id="view-early-warnings">
+          
+          <!-- Engine Architecture Explainability Banner -->
+          <div class="heuristic-banner">
+            <div class="heuristic-icon-col">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><path d="M12 16v-4M12 8h.01"/></svg>
+            </div>
+            <div class="heuristic-text-col">
+              <h4>Transparent Early-Warning Scoring Engine (0 to 100 Points)</h4>
+              <p>Evaluates student distress based on your configured institutional thresholds:
+                <span class="heuristic-rule-tag" id="rule-tag-att">Attendance &lt; 75% (+30 pts)</span>
+                <span class="heuristic-rule-tag" id="rule-tag-marks">Avg Marks &lt; 40% (+30 pts)</span>
+                <span class="heuristic-rule-tag" id="rule-tag-tasks">3+ Pending Tasks (+20 pts)</span>
+                <span class="heuristic-rule-tag" id="rule-tag-drop">Exam Drop &ge; 10% (+20 pts)</span>
+              </p>
+            </div>
+          </div>
+
+          <!-- Risk Level Filter Tabs -->
+          <div class="filter-pills-row mb-4">
+            <button class="filter-pill active" data-warning-filter="all">All Evaluated Students (<span id="count-warn-all">0</span>)</button>
+            <button class="filter-pill pill-danger" data-warning-filter="high">High Priority / Urgent (<span id="count-warn-high">0</span>)</button>
+            <button class="filter-pill pill-warning" data-warning-filter="medium">Medium Priority (<span id="count-warn-medium">0</span>)</button>
+            <button class="filter-pill pill-success" data-warning-filter="low">Low Risk / On Track (<span id="count-warn-low">0</span>)</button>
+          </div>
+
+          <!-- Warning Cards Container -->
+          <div class="warning-cards-grid" id="warning-cards-container">
+            <!-- Rendered via JS -->
+          </div>
+        </section>
+
+        <!-- =================================================================== -->
+        <!-- VIEW 7: SUPPORT PLANS & INTERVENTION TRACKER                       -->
+        <!-- =================================================================== -->
+        <section class="view-panel" id="view-support-plans">
+          <div class="page-header">
+            <div>
+              <h2 class="page-title">Personalized Support & Intervention Plans</h2>
+              <p class="page-subtitle">Design actionable intervention roadmaps, assign mentors, and track weekly task milestones.</p>
+            </div>
+            <div class="page-actions">
+              <button class="btn btn-primary" id="btn-create-support-plan-modal">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+                <span>Create Support Plan</span>
+              </button>
+            </div>
+          </div>
+
+          <!-- Status Filter Tabs -->
+          <div class="filter-pills-row mb-4">
+            <button class="filter-pill active" data-plan-filter="all">All Plans (<span id="count-plans-all">0</span>)</button>
+            <button class="filter-pill" data-plan-filter="in_progress">In Progress (<span id="count-plans-progress">0</span>)</button>
+            <button class="filter-pill" data-plan-filter="pending">Pending Review (<span id="count-plans-pending">0</span>)</button>
+            <button class="filter-pill" data-plan-filter="completed">Completed / Resolved (<span id="count-plans-completed">0</span>)</button>
+          </div>
+
+          <!-- Support Plans Grid -->
+          <div class="support-plans-grid" id="support-plans-container">
+            <!-- Rendered via JS -->
+          </div>
+        </section>
+
+        <!-- =================================================================== -->
+        <!-- VIEW 8: REPORTS & ANALYTICS                                        -->
+        <!-- =================================================================== -->
+        <section class="view-panel" id="view-reports">
+          <div class="page-header">
+            <div>
+              <h2 class="page-title">Academic Reports & Cohort Analytics</h2>
+              <p class="page-subtitle">Comprehensive institutional summary reports, trend evaluations, and exportable datasets.</p>
+            </div>
+            <div class="page-actions">
+              <button class="btn btn-secondary" id="btn-print-report" onclick="window.print()">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="6 9 6 2 18 2 18 9"/><path d="M6 18H4a2 2 0 0 1-2-2v-5a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2v5a2 2 0 0 1-2 2h-2"/><rect width="12" height="8" x="6" y="14"/></svg>
+                <span>Print Summary</span>
+              </button>
+              <button class="btn btn-primary" id="btn-export-reports-csv">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
+                <span>Download Academic CSV</span>
+              </button>
+            </div>
+          </div>
+
+          <!-- Summary Matrix -->
+          <div class="card p-4 mb-4">
+            <h3 class="card-title mb-3">Cohort Performance & Risk Synthesis</h3>
+            <div class="table-responsive">
+              <table class="data-table">
+                <thead>
+                  <tr>
+                    <th>Department</th>
+                    <th>Students</th>
+                    <th>Avg Attendance</th>
+                    <th>Avg Assessment</th>
+                    <th>High Risk (%)</th>
+                    <th>Open Interventions</th>
+                    <th>Intervention Health</th>
+                  </tr>
+                </thead>
+                <tbody id="reports-dept-table-body">
+                  <!-- Rendered via JS -->
+                </tbody>
+              </table>
+            </div>
+          </div>
+
+          <div class="dashboard-grid-2">
+            <div class="card p-4">
+              <h3 class="card-title mb-2">Early-Warning Indicator Breakdown</h3>
+              <p class="card-subtitle mb-4">Distribution of triggers contributing to active early warnings</p>
+              <div id="reports-triggers-list">
+                <!-- Rendered via JS -->
+              </div>
+            </div>
+
+            <div class="card p-4">
+              <h3 class="card-title mb-2">Support Plan Resolution Rate</h3>
+              <p class="card-subtitle mb-4">Progress of interventions across the current semester</p>
+              <div id="reports-intervention-metrics">
+                <!-- Rendered via JS -->
+              </div>
+            </div>
+          </div>
+        </section>
+
+        <!-- =================================================================== -->
+        <!-- VIEW 9: SYSTEM SETTINGS & STORAGE MANAGEMENT                       -->
+        <!-- =================================================================== -->
+        <section class="view-panel" id="view-settings">
+          <div class="page-header">
+            <div>
+              <h2 class="page-title">Application Settings & Configuration</h2>
+              <p class="page-subtitle">Configure heuristic thresholds, manage browser localStorage, and inspect your active session.</p>
+            </div>
+          </div>
+
+          <div class="settings-grid">
+            <!-- Heuristic Thresholds Configuration -->
+            <div class="card p-4">
+              <h3 class="card-title mb-1">Early-Warning Heuristic Thresholds</h3>
+              <p class="card-subtitle mb-4">Adjust the trigger criteria for the deterministic scoring engine.</p>
+              
+              <form id="settings-thresholds-form">
+                <div class="form-group">
+                  <label for="cfg-attendance-threshold" class="form-label">Critical Attendance Threshold (%)</label>
+                  <input type="number" id="cfg-attendance-threshold" class="form-input" min="40" max="95" value="75">
+                  <span class="hint-text">Students with cumulative presence below this receive +30 risk points.</span>
+                </div>
+
+                <div class="form-group">
+                  <label for="cfg-marks-threshold" class="form-label">Critical Marks Passing Threshold (%)</label>
+                  <input type="number" id="cfg-marks-threshold" class="form-input" min="20" max="75" value="40">
+                  <span class="hint-text">Students with average score below this receive +30 risk points.</span>
+                </div>
+
+                <div class="form-group">
+                  <label for="cfg-pending-threshold" class="form-label">Critical Pending Assignments Threshold</label>
+                  <input type="number" id="cfg-pending-threshold" class="form-input" min="1" max="10" value="3">
+                  <span class="hint-text">Students with equal or more pending tasks receive +20 risk points.</span>
+                </div>
+
+                <button type="submit" class="btn btn-primary mt-2">Save Threshold Configuration</button>
+              </form>
+            </div>
+
+            <!-- Storage Management -->
+            <div class="card p-4">
+              <h3 class="card-title mb-1">Local Browser Storage Diagnostics</h3>
+              <p class="card-subtitle mb-4">Inspect persisted entities and manage application state.</p>
+
+              <div class="storage-stats-box">
+                <div class="storage-stat-item">
+                  <span>Storage Engine:</span>
+                  <strong>localStorage (HTML5 Web Storage)</strong>
+                </div>
+                <div class="storage-stat-item">
+                  <span>Persisted Schema:</span>
+                  <strong id="storage-stat-version">v2.4 Blank State</strong>
+                </div>
+                <div class="storage-stat-item">
+                  <span>Total Persisted Records:</span>
+                  <strong id="storage-stat-records">0 entities</strong>
+                </div>
+                <div class="storage-stat-item">
+                  <span>Estimated Storage Usage:</span>
+                  <strong id="storage-stat-size">0 KB</strong>
+                </div>
+              </div>
+
+              <div class="storage-actions mt-4">
+                <button class="btn btn-secondary btn-block mb-2" id="btn-settings-reopen-wizard">
+                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 20h9"/><path d="M16.5 3.5a2.12 2.12 0 0 1 3 3L7 19l-4 1 1-4Z"/></svg>
+                  <span>Re-run Requirements Setup Wizard</span>
+                </button>
+                <button class="btn btn-ghost text-danger btn-block" id="btn-settings-clear-all">
+                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 6h18M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/></svg>
+                  <span>Clear All Workspace Data & Reset</span>
+                </button>
+              </div>
+            </div>
+
+            <!-- Active Session Box -->
+            <div class="card p-4">
+              <h3 class="card-title mb-1">Active Session Account</h3>
+              <p class="card-subtitle mb-4">Your current authenticated profile.</p>
+              
+              <div class="current-session-box">
+                <div class="cs-avatar" id="cs-avatar">US</div>
+                <div class="cs-meta">
+                  <div class="cs-name" id="cs-name">User Name</div>
+                  <div class="cs-email" id="cs-email">user@institution.edu</div>
+                  <div class="cs-role"><span class="badge badge-teacher" id="cs-badge">Teacher</span></div>
+                </div>
+              </div>
+
+              <div class="mt-4">
+                <button class="btn btn-ghost text-danger btn-block" id="btn-settings-logout">Sign Out</button>
+              </div>
+            </div>
+
+            <!-- About Workspace -->
+            <div class="card p-4">
+              <h3 class="card-title mb-1">About EduSupport</h3>
+              <p class="card-subtitle mb-3">Customized Institutional Analytics</p>
+              <div class="about-info-text">
+                <p>EduSupport runs 100% locally in your browser. All student records, daily attendances, assessment grades, and support intervention plans are stored privately and persisted in your browser's localStorage.</p>
+                <p class="mt-2 text-muted"><strong>Deterministic AI-Guided Insights:</strong> Distress calculations are transparent and explainable to help educators provide supportive, timely mentorship.</p>
+              </div>
+            </div>
+          </div>
+        </section>
+
+      </main>
+    </div>
+  </div>
+
+  <!-- ========================================================================= -->
+  <!-- 4. MODALS SYSTEM                                                          -->
+  <!-- ========================================================================= -->
+
+  <!-- Modal 1: Student Detail & Holistic Profile -->
+  <div class="modal-backdrop" id="modal-student-detail" style="display: none;" role="dialog" aria-modal="true">
+    <div class="modal-dialog modal-xl">
+      <div class="modal-header">
+        <div class="modal-title-with-badge">
+          <h3 class="modal-title" id="sd-modal-name">Student Profile</h3>
+          <span class="badge" id="sd-modal-risk-badge">Low Risk</span>
+        </div>
+        <button class="modal-close-btn" data-modal-close="modal-student-detail">&times;</button>
+      </div>
+      <div class="modal-body p-0">
+        <!-- Student Quick Header -->
+        <div class="profile-hero">
+          <div class="profile-hero-avatar" id="sd-avatar">US</div>
+          <div class="profile-hero-meta">
+            <h4 id="sd-name">Student Name</h4>
+            <div class="profile-hero-tags">
+              <span class="tag-item" id="sd-id">STU-001</span>
+              <span class="tag-item" id="sd-dept">Department</span>
+              <span class="tag-item" id="sd-sem">Semester 1</span>
+              <span class="tag-item" id="sd-email">email@institution.edu</span>
+            </div>
+          </div>
+          <div class="profile-hero-score-box">
+            <div class="score-label">Early-Warning Score</div>
+            <div class="score-val" id="sd-score">0<span>/100</span></div>
+          </div>
+        </div>
+
+        <!-- Student Profile Tabs -->
+        <div class="profile-tabs-bar">
+          <button class="p-tab-btn active" data-ptab="overview">Academic Summary</button>
+          <button class="p-tab-btn" data-ptab="attendance">Attendance History</button>
+          <button class="p-tab-btn" data-ptab="assessments">Assessment Breakdown</button>
+          <button class="p-tab-btn" data-ptab="plans">Support Plans & Interventions</button>
+          <button class="p-tab-btn" data-ptab="tasks">Assigned Tasks</button>
+        </div>
+
+        <!-- Tab Content 1: Overview -->
+        <div class="profile-tab-content active" id="ptab-overview">
+          <div class="p-grid-2">
+            <!-- Warning Diagnosis Box -->
+            <div class="profile-section-card">
+              <h5 class="profile-subheading">Early-Warning Diagnosis & Contributing Triggers</h5>
+              <div id="sd-warning-reasons" class="warning-reasons-list"></div>
+              <div class="recommendation-box mt-3" id="sd-recommendation-box"></div>
+            </div>
+
+            <!-- Quick Academic Stats -->
+            <div class="profile-section-card">
+              <h5 class="profile-subheading">Performance Snapshot</h5>
+              <div class="snapshot-metrics-grid">
+                <div class="snap-box">
+                  <span class="snap-label">Attendance Rate</span>
+                  <strong class="snap-val" id="sd-snap-attendance">--%</strong>
+                  <span class="snap-sub" id="sd-snap-attendance-sub">--</span>
+                </div>
+                <div class="snap-box">
+                  <span class="snap-label">Average Marks</span>
+                  <strong class="snap-val" id="sd-snap-marks">--%</strong>
+                  <span class="snap-sub" id="sd-snap-marks-sub">--</span>
+                </div>
+                <div class="snap-box">
+                  <span class="snap-label">Pending Assignments</span>
+                  <strong class="snap-val text-warning" id="sd-snap-tasks">0</strong>
+                  <span class="snap-sub">Active tasks</span>
+                </div>
+                <div class="snap-box">
+                  <span class="snap-label">Active Support Plans</span>
+                  <strong class="snap-val text-emerald" id="sd-snap-plans">0</strong>
+                  <span class="snap-sub">In progress</span>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Mini Trend Charts -->
+          <div class="p-grid-2 mt-3">
+            <div class="profile-section-card">
+              <h5 class="profile-subheading">Student Attendance Trajectory</h5>
+              <canvas id="chart-student-attendance" height="180"></canvas>
+            </div>
+            <div class="profile-section-card">
+              <h5 class="profile-subheading">Subject Assessment Scores</h5>
+              <canvas id="chart-student-assessments" height="180"></canvas>
+            </div>
+          </div>
+        </div>
+
+        <!-- Tab Content 2: Attendance -->
+        <div class="profile-tab-content" id="ptab-attendance" style="display: none;">
+          <div class="table-responsive">
+            <table class="data-table">
+              <thead>
+                <tr>
+                  <th>Date</th>
+                  <th>Status</th>
+                  <th>Session Type</th>
+                  <th>Remarks</th>
+                </tr>
+              </thead>
+              <tbody id="sd-attendance-tbody"></tbody>
+            </table>
+          </div>
+        </div>
+
+        <!-- Tab Content 3: Assessments -->
+        <div class="profile-tab-content" id="ptab-assessments" style="display: none;">
+          <div class="table-responsive">
+            <table class="data-table">
+              <thead>
+                <tr>
+                  <th>Assessment Title</th>
+                  <th>Subject</th>
+                  <th>Marks Obtained</th>
+                  <th>Max Marks</th>
+                  <th>Percentage</th>
+                  <th>Grade Status</th>
+                </tr>
+              </thead>
+              <tbody id="sd-assessments-tbody"></tbody>
+            </table>
+          </div>
+        </div>
+
+        <!-- Tab Content 4: Support Plans -->
+        <div class="profile-tab-content" id="ptab-plans" style="display: none;">
+          <div id="sd-plans-container" class="sd-plans-list"></div>
+        </div>
+
+        <!-- Tab Content 5: Tasks -->
+        <div class="profile-tab-content" id="ptab-tasks" style="display: none;">
+          <div id="sd-tasks-container"></div>
+        </div>
+      </div>
+      <div class="modal-footer">
+        <div class="modal-footer-left">
+          <button class="btn btn-secondary btn-sm" id="sd-btn-edit-student">Edit Details</button>
+        </div>
+        <div class="modal-footer-right">
+          <button class="btn btn-primary btn-sm" id="sd-btn-create-plan">Create Support Plan</button>
+          <button class="btn btn-ghost btn-sm" data-modal-close="modal-student-detail">Close</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Modal 2: Add / Edit Student Form -->
+  <div class="modal-backdrop" id="modal-student-form" style="display: none;" role="dialog" aria-modal="true">
+    <div class="modal-dialog">
+      <div class="modal-header">
+        <h3 class="modal-title" id="student-form-modal-title">Add New Student</h3>
+        <button class="modal-close-btn" data-modal-close="modal-student-form">&times;</button>
+      </div>
+      <form id="form-student">
+        <div class="modal-body">
+          <input type="hidden" id="student-form-id">
+
+          <div class="form-row-2">
+            <div class="form-group">
+              <label for="sf-id-display" class="form-label">Student ID *</label>
+              <input type="text" id="sf-id-display" class="form-input" placeholder="e.g. STU-1001" required>
+            </div>
+            <div class="form-group">
+              <label for="sf-name" class="form-label">Full Name *</label>
+              <input type="text" id="sf-name" class="form-input" placeholder="e.g. Clara Oswald" required>
+            </div>
+          </div>
+
+          <div class="form-row-2">
+            <div class="form-group">
+              <label for="sf-email" class="form-label">Email Address *</label>
+              <input type="email" id="sf-email" class="form-input" placeholder="clara@institution.edu" required>
+            </div>
+            <div class="form-group">
+              <label for="sf-department" class="form-label">Department *</label>
+              <input type="text" id="sf-department" class="form-input" placeholder="e.g. Computer Science" required>
+            </div>
+          </div>
+
+          <div class="form-row-2">
+            <div class="form-group">
+              <label for="sf-semester" class="form-label">Semester / Year</label>
+              <select id="sf-semester" class="form-select">
+                <option value="1">Semester 1</option>
+                <option value="2">Semester 2</option>
+                <option value="3">Semester 3</option>
+                <option value="4">Semester 4</option>
+                <option value="5">Semester 5</option>
+                <option value="6">Semester 6</option>
+                <option value="7">Semester 7</option>
+                <option value="8">Semester 8</option>
+              </select>
+            </div>
+            <div class="form-group">
+              <label for="sf-mentor" class="form-label">Assigned Advisor / Mentor</label>
+              <input type="text" id="sf-mentor" class="form-input" placeholder="Faculty Advisor">
+            </div>
+          </div>
+        </div>
+        <div class="modal-footer">
+          <button type="button" class="btn btn-ghost" data-modal-close="modal-student-form">Cancel</button>
+          <button type="submit" class="btn btn-primary" id="btn-submit-student">Save Student</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- Modal 3: Add / Edit Assessment -->
+  <div class="modal-backdrop" id="modal-assessment-form" style="display: none;" role="dialog" aria-modal="true">
+    <div class="modal-dialog">
+      <div class="modal-header">
+        <h3 class="modal-title" id="assessment-form-title">Create New Assessment</h3>
+        <button class="modal-close-btn" data-modal-close="modal-assessment-form">&times;</button>
+      </div>
+      <form id="form-assessment">
+        <div class="modal-body">
+          <input type="hidden" id="af-id">
+
+          <div class="form-group">
+            <label for="af-title" class="form-label">Assessment Title *</label>
+            <input type="text" id="af-title" class="form-input" placeholder="e.g. Midterm Examination 1" required>
+          </div>
+
+          <div class="form-row-2">
+            <div class="form-group">
+              <label for="af-subject" class="form-label">Subject *</label>
+              <select id="af-subject" class="form-select" required>
+                <!-- Populated dynamically from requirements -->
+              </select>
+            </div>
+            <div class="form-group">
+              <label for="af-max-marks" class="form-label">Maximum Marks *</label>
+              <input type="number" id="af-max-marks" class="form-input" min="10" max="1000" value="100" required>
+            </div>
+          </div>
+
+          <div class="form-group">
+            <label for="af-date" class="form-label">Date Conducted *</label>
+            <input type="date" id="af-date" class="form-input" required>
+          </div>
+        </div>
+        <div class="modal-footer">
+          <button type="button" class="btn btn-ghost" data-modal-close="modal-assessment-form">Cancel</button>
+          <button type="submit" class="btn btn-primary">Create Assessment</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- Modal 4: Record Marks for Assessment -->
+  <div class="modal-backdrop" id="modal-marks-entry" style="display: none;" role="dialog" aria-modal="true">
+    <div class="modal-dialog modal-lg">
+      <div class="modal-header">
+        <div>
+          <h3 class="modal-title" id="mme-title">Record Marks</h3>
+          <p class="modal-subtitle text-muted" id="mme-subtitle">Subject - Max Marks: 100</p>
+        </div>
+        <button class="modal-close-btn" data-modal-close="modal-marks-entry">&times;</button>
+      </div>
+      <form id="form-marks-entry">
+        <input type="hidden" id="mme-assessment-id">
+        <div class="modal-body p-0">
+          <div class="table-responsive max-h-400">
+            <table class="data-table">
+              <thead>
+                <tr>
+                  <th>Student Name</th>
+                  <th>Student ID</th>
+                  <th>Obtained Marks</th>
+                  <th>Calculated %</th>
+                </tr>
+              </thead>
+              <tbody id="mme-table-body">
+                <!-- Rendered dynamically -->
+              </tbody>
+            </table>
+          </div>
+        </div>
+        <div class="modal-footer">
+          <button type="button" class="btn btn-ghost" data-modal-close="modal-marks-entry">Cancel</button>
+          <button type="submit" class="btn btn-primary">Save Marks</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- Modal 5: Create / Edit Support Plan -->
+  <div class="modal-backdrop" id="modal-support-plan-form" style="display: none;" role="dialog" aria-modal="true">
+    <div class="modal-dialog modal-lg">
+      <div class="modal-header">
+        <h3 class="modal-title" id="spf-title">Create Personalized Support Plan</h3>
+        <button class="modal-close-btn" data-modal-close="modal-support-plan-form">&times;</button>
+      </div>
+      <form id="form-support-plan">
+        <div class="modal-body">
+          <input type="hidden" id="spf-id">
+
+          <div class="form-row-2">
+            <div class="form-group">
+              <label for="spf-student-select" class="form-label">Target Student *</label>
+              <select id="spf-student-select" class="form-select" required>
+                <!-- Populated via JS -->
+              </select>
+            </div>
+            <div class="form-group">
+              <label for="spf-mentor" class="form-label">Assigned Mentor / Teacher *</label>
+              <input type="text" id="spf-mentor" class="form-input" placeholder="Faculty Mentor" required>
+            </div>
+          </div>
+
+          <div class="form-group">
+            <label for="spf-concern" class="form-label">Identified Academic Concern *</label>
+            <input type="text" id="spf-concern" class="form-input" placeholder="e.g. Critical attendance decline and failing test scores" required>
+          </div>
+
+          <div class="form-group">
+            <label for="spf-intervention" class="form-label">Recommended Intervention Strategy *</label>
+            <textarea id="spf-intervention" class="form-input" rows="2" placeholder="e.g. Schedule bi-weekly mentor check-in, arrange peer tutor sessions, break pending assignments into daily milestones." required></textarea>
+          </div>
+
+          <div class="form-row-3">
+            <div class="form-group">
+              <label for="spf-start-date" class="form-label">Start Date</label>
+              <input type="date" id="spf-start-date" class="form-input" required>
+            </div>
+            <div class="form-group">
+              <label for="spf-followup-date" class="form-label">Follow-up Review Date</label>
+              <input type="date" id="spf-followup-date" class="form-input" required>
+            </div>
+            <div class="form-group">
+              <label for="spf-status" class="form-label">Status</label>
+              <select id="spf-status" class="form-select">
+                <option value="in_progress">In Progress</option>
+                <option value="pending">Pending Review</option>
+                <option value="completed">Completed / Resolved</option>
+              </select>
+            </div>
+          </div>
+
+          <div class="form-group">
+            <label class="form-label">Actionable Weekly Tasks (Checklist for Student & Mentor)</label>
+            <div id="spf-tasks-list" class="spf-tasks-container">
+              <!-- Dynamic task rows -->
+            </div>
+            <button type="button" class="btn btn-secondary btn-sm mt-2" id="btn-spf-add-task">+ Add Task Item</button>
+          </div>
+
+          <div class="form-group">
+            <label for="spf-notes" class="form-label">Mentor Notes / Observations</label>
+            <textarea id="spf-notes" class="form-input" rows="2" placeholder="Student demonstrated positive attitude during consultation."></textarea>
+          </div>
+        </div>
+        <div class="modal-footer">
+          <button type="button" class="btn btn-ghost" data-modal-close="modal-support-plan-form">Cancel</button>
+          <button type="submit" class="btn btn-primary" id="btn-submit-support-plan">Save Support Plan</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- Modal 6: Add Assignment Form -->
+  <div class="modal-backdrop" id="modal-assignment-form" style="display: none;" role="dialog" aria-modal="true">
+    <div class="modal-dialog">
+      <div class="modal-header">
+        <h3 class="modal-title" id="asf-title">Create Learning Assignment</h3>
+        <button class="modal-close-btn" data-modal-close="modal-assignment-form">&times;</button>
+      </div>
+      <form id="form-assignment">
+        <div class="modal-body">
+          <input type="hidden" id="asf-id">
+
+          <div class="form-group">
+            <label for="asf-title-input" class="form-label">Assignment Title *</label>
+            <input type="text" id="asf-title-input" class="form-input" placeholder="e.g. Lab Project Report" required>
+          </div>
+
+          <div class="form-row-2">
+            <div class="form-group">
+              <label for="asf-subject" class="form-label">Subject *</label>
+              <select id="asf-subject" class="form-select" required>
+                <!-- Populated dynamically from requirements -->
+              </select>
+            </div>
+            <div class="form-group">
+              <label for="asf-student-select" class="form-label">Assign To Student *</label>
+              <select id="asf-student-select" class="form-select" required>
+                <!-- Populated via JS -->
+              </select>
+            </div>
+          </div>
+
+          <div class="form-row-2">
+            <div class="form-group">
+              <label for="asf-due-date" class="form-label">Due Date *</label>
+              <input type="date" id="asf-due-date" class="form-input" required>
+            </div>
+            <div class="form-group">
+              <label for="asf-status" class="form-label">Initial Status</label>
+              <select id="asf-status" class="form-select">
+                <option value="pending">Pending</option>
+                <option value="overdue">Overdue</option>
+                <option value="completed">Completed</option>
+              </select>
+            </div>
+          </div>
+        </div>
+        <div class="modal-footer">
+          <button type="button" class="btn btn-ghost" data-modal-close="modal-assignment-form">Cancel</button>
+          <button type="submit" class="btn btn-primary">Save Assignment</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- Modal 7: Reusable Confirmation Dialog -->
+  <div class="modal-backdrop" id="modal-confirm" style="display: none;" role="dialog" aria-modal="true">
+    <div class="modal-dialog modal-sm">
+      <div class="modal-header">
+        <h3 class="modal-title" id="confirm-title">Confirm Action</h3>
+        <button class="modal-close-btn" data-modal-close="modal-confirm">&times;</button>
+      </div>
+      <div class="modal-body">
+        <p id="confirm-message">Are you sure you want to proceed with this action?</p>
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-ghost" data-modal-close="modal-confirm">Cancel</button>
+        <button type="button" class="btn btn-danger" id="btn-confirm-proceed">Confirm</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- JavaScript Application Bundle -->
+  <script src="script.js"></script>
+</body>
+</html>
